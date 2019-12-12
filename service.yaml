@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: si-demo-svc
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  ports:
+    - name: "manager1-port"
+      protocol: "TCP"
+      port: 2810
+      targetPort: 2810
+      nodePort: 30281
+    - name: "manager2-port"
+      protocol: "TCP"
+      port: 2811
+      targetPort: 2811
+      nodePort: 30282
+    - name: "name-port"
+      protocol: "TCP"
+      port: 2809
+      targetPort: 2809
+      nodePort: 30289
+    - name: "rtc1-port"
+      protocol: "TCP"
+      port: 30555
+      targetPort: 30555
+      nodePort: 30555
+    - name: "rtc2-port"
+      protocol: "TCP"
+      port: 30556
+      targetPort: 30556
+      nodePort: 30556
+  selector:
+    app: rtc-flip
+

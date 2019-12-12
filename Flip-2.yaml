@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-flip-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtc-flip
+  template:
+    metadata:
+      labels:
+        app: rtc-flip
+    spec:
+      containers:
+      - name: container-flip-2
+        image: kuroseaist/flip
+        imagePullPolicy: IfNotPresent
+        command:
+          - /work/FlipComp
+        args:
+          - "-o"
+          - "corba.nameservers:192.168.11.70"
+          - "-o"
+          - "manager.components.preactivation:Flip0"
+          - "-o "
+          - "corba.args: -ORBgiopMaxMsgSize 4194304"
+          - "-o"
+          - "corba.endpoint: :30556"
+          - "-o"
+          - "corba.alternate_iiop_addresses: 192.168.11.4:30556"
+          - "-o"
+          - "manager.is_master: YES"
+          - "-o"
+          - "corba.master_manager: :2811"
+          - "-o"
+          - "Category.Flip.conf.default.flip_mode: -1"
+          - "-o"
+          - "port.inport.original_image.allow_dup_connections: YES"
+          - "-o"
+          - "port.outport.fliped_image.allow_dup_connections: YES"
+      nodeSelector:
+        flip-2: "true"
