@@ -12,11 +12,16 @@
 
 # システム構成
 
-必要なもの
+## 必要なもの
 
  - Kubernetes マスター用 PC 1台 (Raspberry PI 可)
  - Kubernetes ワーカー用 PC 2台 (Raspberry PI 可)
  - ロボット用 PC 1台
+
+## 静的構造
+
+![system](https://user-images.githubusercontent.com/45954537/70786986-21c2b400-1dd1-11ea-98da-6e0161343203.png)
+
 
 # 事前確認
 
