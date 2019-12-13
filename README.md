@@ -22,13 +22,114 @@
 
 ![system](https://user-images.githubusercontent.com/45954537/70786986-21c2b400-1dd1-11ea-98da-6e0161343203.png)
 
+## ソフトウェアのインストール
+
+各PCに必要なソフトウェアの一覧を下表に示します。
+
+| | Kubernetes | Docker | OpenRTM-aist |異常検出＆切り替えアプリ|jqコマンド
+:----:|:----:|:----:|:----:|:----:|:----:|
+| マスター用PC | ○ | ○ | - | ○ | ○ |
+| ワーカー用PC | ○ | ○ | - | - | - |
+| ロボット用PC | - | - | ○ | - | - |
+
+### kuberntest と Docker のインストール
+
+Kubernetes のインストールは、下記のURLを参照ください。
+
+https://github.com/r-kurose/rtm_k8s/blob/master/index.md#インストール手順
+
+### OpenRTM-aist のインストール
+
+- Windows の場合
+
+  下記のURLの手順に従ってインストールしてください。
+  https://www.openrtm.org/openrtm/ja/doc/installation/install_1_2/cpp_1_2/install_windows_1_2
+
+- Ubuntu の場合
+
+  下記のURLの手順に従ってインストールしてください。
+  https://www.openrtm.org/openrtm/ja/doc/installation/install_1_2/cpp_1_2/install_ubuntu_1_2
+
+
+### 異常検知とRTCの切り替えスクリプトをダウンロード
+下記コマンドで必要なスクリプトをマスター用 PC で取得してください。
+
+これらは、異常の検出や多重化の RTC 切り替えに使うスクリプトで動作確認で使用します。
+
+  `wget https://raw.githubusercontent.com/r-kurose/rtm_k8s_redundancy/master/app.sh`
+  `wget https://raw.githubusercontent.com/r-kurose/rtm_k8s_redundancy/master/man_ctl.py`
+
+### JSON形式の情報をパースする jq コマンドのインストール
+app.sh は kubernetes から得られるJSON形式の情報をパースして切り替えを判断しているため、
+
+JSON形式の情報をパースできる jq コマンドを同じくマスター用PCへインストールします。
+
+- Windows の場合
+
+  下記のURLからダウンロード、インストールしてください。
+  
+  https://stedolan.github.io/jq/
+
+- Ubuntu の場合
+
+  `sudo apt -y install jq`
+  
+### OpenCVCamera と CameraViewer のインストール
+
+- Windows の場合
+
+  OpenRTM-aist がインストールされていれば、追加のインストールは不要です。
+  
+  OpenRTM-aist をインストールしたフォルダ配下に OpenCVCameraComp と CameraViewer というRTCがあるので起動してください。
+  
+  - 詳細なインストール場所を知りたい方は以下を参照してください
+    https://www.openrtm.org/openrtm/ja/doc/installation/install_1_2/cpp_1_2/install_windows_1_2
+
+- Ubuntu の場合
+
+　下記のgithubからソースコードを取得してください。
 
 # 事前確認
 
+まずは、カメラとカメラビューワーの RTC の動作確認を行います。
+
+これは、カメラが使える環境であるかを事前に確認する項目なので、不要であれば実施は不要です。
+
+詳細な確認手順は下記のURLを参照してください。
+
+https://www.openrtm.org/openrtm/ja/doc/installation/sample_components/opencvcameracomp
 
 
 # 構築
 
+## クラスター構築手順
+
+まずマスターノードを初期化し、その後にワーカーノードをマスターノードに登録します。
+具体的なやり方を下記に示します。
+
+### マスター用PCで初期化
+　下記の初期化手順をおまじないとして実行してください。これでマスターノードとして動作します。
+```
+kubeadm init --pod-network-cidr=10.244.0.0/16
+```
+
+### ワーカー用PCでワーカーノードとしてマスターへ登録
+```
+kubeadm join <マスターノードの kubeadm init 実行で表示されるパラメーター>
+```
+確認方法: マスターノードで `kubectl get nodes` を実行するとノードが見えます。
+
+### クラスタのネットワーク構築
+　マスター用PCでKubernetes のネットワークを構築するために以下のおまじないを実行してください。
+```
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+```
+### ワーカーにラベルを設定
+　マスターPC からワーカーにラベルを設定します。
+このラベルは、ソフトウェア（Docker イメージ）を動かすワーカーノードを指定するのに使用されます。
+
+`kubectl label node <ノード名> flip-1=true`
+`kubectl label node <ノード名> flip-2=true`
 
 
 # 動作確認
